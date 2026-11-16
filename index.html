@@ -1,0 +1,642 @@
+
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#09090d">
+<meta name="description" content="GemTune Radar — персональные музыкальные открытия">
+<title>GemTune Radar</title>
+
+<style>
+:root{
+ color-scheme:dark;
+ --bg:#09090d;--panel:#171720;--panel2:#20202b;
+ --text:#f5f4fa;--muted:#a3a1b4;
+ --accent:#9565ff;--accent2:#6e40ec;
+ --line:#2b2a38;--good:#67d9a3;--bad:#ff777e
+}
+*{box-sizing:border-box}
+html,body{
+ margin:0;min-height:100%;background:var(--bg);color:var(--text);
+ font:16px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif
+}
+body{
+ padding:env(safe-area-inset-top) 0 calc(88px + env(safe-area-inset-bottom));
+ background:radial-gradient(ellipse at 20% -10%,#211638 0,transparent 45%),var(--bg)
+}
+button,input,textarea{font:inherit}
+button{cursor:pointer;color:inherit;border:0}
+button:disabled{opacity:.45;cursor:not-allowed}
+.app{max-width:760px;margin:auto;padding:18px 17px 28px}
+header{display:flex;align-items:center;justify-content:space-between;margin:8px 3px 22px}
+.brand{display:flex;align-items:center;gap:12px}
+.logo{font-size:32px;color:var(--accent);filter:drop-shadow(0 0 12px #7544ff)}
+h1{font-size:25px;letter-spacing:-.7px;margin:0}
+header p{margin:3px 0 0;color:var(--muted);font-size:13px}
+.iconbtn{background:var(--panel2);border:1px solid var(--line);width:43px;height:43px;border-radius:15px;font-size:20px}
+.panel{
+ background:linear-gradient(145deg,#1a1a25,#13131b);
+ border:1px solid #242331;border-radius:24px;padding:19px;
+ margin-bottom:16px;box-shadow:0 12px 35px #0002
+}
+.panel h2{font-size:18px;margin:0 0 7px}
+.muted{color:var(--muted)}.small{font-size:13px}
+.label{display:block;font-size:13px;color:var(--muted);margin:14px 0 7px}
+input,textarea{
+ width:100%;background:#101018;border:1px solid #393747;border-radius:15px;
+ padding:14px;color:var(--text);outline:none
+}
+input:focus,textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px #9565ff22}
+textarea{resize:vertical;min-height:95px}
+.btn{
+ border-radius:15px;padding:13px 16px;font-weight:650;transition:.15s;
+ display:inline-flex;align-items:center;justify-content:center;gap:8px
+}
+.primary{background:linear-gradient(110deg,#7846ed,#a16aff);color:white}
+.secondary{background:var(--panel2);border:1px solid var(--line)}
+.danger{background:#302027;border:1px solid #56313c;color:#ff9ba3}
+.wide{width:100%;margin-top:13px}
+.toggle{display:flex;gap:7px;background:#101018;border:1px solid var(--line);padding:4px;border-radius:14px}
+.toggle button{flex:1;border-radius:11px;padding:10px 7px;background:transparent;color:var(--muted);font-size:13px}
+.toggle button.active{background:var(--accent2);color:white}
+.tabs{
+ position:fixed;z-index:20;bottom:0;left:0;right:0;
+ padding:8px 12px calc(9px + env(safe-area-inset-bottom));
+ background:#0d0d14ed;backdrop-filter:blur(18px);
+ border-top:1px solid #292834;display:flex;justify-content:center
+}
+.tabs-inner{width:min(760px,100%);display:flex;justify-content:space-around}
+.tab{
+ flex:1;background:none;color:var(--muted);padding:7px 4px;
+ display:flex;flex-direction:column;align-items:center;gap:3px;font-size:12px
+}
+.tab .ti{font-size:23px}.tab.active{color:#a982ff}
+.view{display:none}.view.active{display:block}
+.chip{display:inline-flex;background:#292237;color:#cdbbff;padding:5px 9px;border-radius:9px;font-size:12px;margin:3px 3px 0 0}
+.status{font-size:13px;color:var(--muted);margin:9px 2px;white-space:pre-wrap}
+.track-card{padding:16px}
+.match{font-size:13px;color:#c9b5ff;margin-bottom:12px}
+.cover{width:100%;aspect-ratio:1;object-fit:cover;border-radius:19px;background:#242331;display:block}
+.track-title{font-size:23px;font-weight:750;letter-spacing:-.5px;margin:15px 0 2px}
+.artist{color:var(--muted);font-size:16px}
+audio{width:100%;height:39px;margin:14px 0 8px;accent-color:var(--accent)}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+.actions .btn{padding:15px 8px;font-size:15px}
+.tags{margin-top:9px}
+.empty{text-align:center;padding:35px 15px;color:var(--muted)}
+.empty .big{font-size:40px;margin-bottom:12px}
+.favrow{display:flex;gap:12px;align-items:center;padding:11px 0;border-bottom:1px solid var(--line)}
+.favrow:last-child{border:0}
+.favrow img{width:62px;height:62px;object-fit:cover;border-radius:12px;background:#252432}
+.favinfo{flex:1;min-width:0}
+.favinfo strong,.favinfo span{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.favinfo span{color:var(--muted);font-size:13px}
+.links{display:flex;gap:5px;flex-wrap:wrap;margin-top:6px}
+.links a{font-size:11px;color:#d5c6ff;text-decoration:none;background:#282238;border-radius:8px;padding:5px 7px}
+.modal{position:fixed;z-index:50;inset:0;background:#000a;display:none;align-items:center;justify-content:center;padding:20px}
+.modal.show{display:flex}
+.dialog{width:min(460px,100%);background:#191923;border:1px solid #343242;border-radius:23px;padding:22px;box-shadow:0 25px 80px #0008}
+.dialog h2{margin:0 0 8px}
+.dialog p{color:var(--muted);font-size:14px}
+.dialog .btn{margin-top:10px}
+hr{border:0;border-top:1px solid var(--line);margin:16px 0}
+.spinner{
+ display:inline-block;width:15px;height:15px;border:2px solid #ffffff40;
+ border-top-color:white;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:7px
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media(min-width:600px){
+ .cover{max-height:480px;width:auto;max-width:100%;margin:auto}
+ .track-layout{display:grid;grid-template-columns:minmax(220px,.9fr) 1.1fr;gap:20px;align-items:center}
+ .track-meta{padding:5px}
+}
+</style>
+</head>
+
+<body>
+<div class="app">
+<header>
+ <div class="brand">
+  <div class="logo">✦</div>
+  <div><h1>GemTune Radar</h1><p>Найди следующую любимую песню</p></div>
+ </div>
+ <button class="iconbtn" id="settingsBtn" aria-label="Настройки">⚙</button>
+</header>
+
+<section id="searchView" class="view active">
+ <div class="panel">
+  <h2>🎧 Твой музыкальный вкус</h2>
+  <div class="muted small">Введи от 3 до 10 любимых артистов или треков.</div>
+  <label class="label" for="seeds">Исполнители / треки (каждый с новой строки или через запятую)</label>
+  <textarea id="seeds" placeholder="Radiohead&#10;Daft Punk&#10;Arctic Monkeys"></textarea>
+  <label class="label">Режим рекомендаций</label>
+  <div class="toggle">
+   <button id="popularBtn" class="active">Популярное</button>
+   <button id="undergroundBtn">Скрытые жемчужины</button>
+  </div>
+  <button class="btn primary wide" id="buildBtn">✦ Собрать мой профиль</button>
+  <div class="status" id="buildStatus"></div>
+ </div>
+ <div class="panel">
+  <h2>Твой профиль тегов</h2>
+  <div class="muted small">Веса обновляются после лайков и дизлайков.</div>
+  <div id="profileTags" class="tags"><span class="muted small">Пока профиль пуст.</span></div>
+ </div>
+</section>
+
+<section id="discoverView" class="view">
+ <div class="panel">
+  <div style="display:flex;justify-content:space-between;align-items:center">
+   <h2>✦ Открытия</h2><span class="muted small" id="queueCount"></span>
+  </div>
+  <div class="muted small">Слушай, оценивай — алгоритм подстроится.</div>
+  <div class="status" id="queueStatus"></div>
+ </div>
+ <div id="trackHost"></div>
+ <div class="panel" id="discoverEmpty">
+  <div class="empty"><div class="big">♫</div><b>Пока нет рекомендаций</b>
+   <p>Сначала собери профиль во вкладке «Поиск».</p>
+   <button class="btn primary" onclick="switchTab('search')">Настроить вкус</button>
+  </div>
+ </div>
+</section>
+
+<section id="favoritesView" class="view">
+ <div class="panel">
+  <div style="display:flex;align-items:center;justify-content:space-between">
+   <h2>♥ Избранное</h2><span id="favCount" class="muted small">0 треков</span>
+  </div>
+  <div id="favoritesList"></div>
+  <button class="btn secondary wide" id="exportBtn">⇩ Экспорт списка в TXT</button>
+  <button class="btn danger wide" id="clearFavs">Очистить избранное</button>
+ </div>
+</section>
+</div>
+
+<nav class="tabs"><div class="tabs-inner">
+ <button class="tab active" data-tab="search"><span class="ti">⌕</span>Поиск</button>
+ <button class="tab" data-tab="discover"><span class="ti">✦</span>Открытия</button>
+ <button class="tab" data-tab="favorites"><span class="ti">♡</span>Избранное</button>
+</div></nav>
+
+<div class="modal" id="keyModal"><div class="dialog">
+ <h2>🔑 Last.fm API Key</h2>
+ <p>Нужен бесплатный API-ключ Last.fm. Он хранится только в этом браузере.</p>
+ <label class="label" for="apiKeyInput">API Key</label>
+ <input id="apiKeyInput" placeholder="Вставь свой Last.fm API key" autocomplete="off">
+ <p><a href="https://www.last.fm/api/account/create" target="_blank" rel="noopener" style="color:#b99cff">Получить бесплатный ключ ↗</a></p>
+ <button class="btn primary wide" id="saveKey">Сохранить ключ</button>
+ <button class="btn secondary wide" id="closeKey">Позже</button>
+</div></div>
+
+<div class="modal" id="settingsModal"><div class="dialog">
+ <h2>Настройки</h2><p>Ключ Last.fm хранится в localStorage вашего браузера.</p>
+ <button class="btn secondary wide" id="changeKey">Изменить API Key</button>
+ <button class="btn secondary wide" id="rebuild">Пересобрать рекомендации</button>
+ <button class="btn danger wide" id="resetData">Сбросить профиль и оценки</button>
+ <button class="btn primary wide" id="closeSettings">Готово</button>
+</div></div>
+
+<script>
+(() => {
+'use strict';
+
+const $ = id => document.getElementById(id);
+const STORE = 'sonar_v1';
+const API = 'https://ws.audioscrobbler.com/2.0/';
+const BATCH_SIZE = 5;
+const MAX_CANDIDATES = 40;
+
+let data = loadData();
+let mode = data.mode || 'popular';
+let queue = [];
+let qIndex = 0;
+let busy = false;
+let buildToken = 0;
+let queueToken = 0;
+let activeAudio = null;
+
+function defaultData(){
+ return {
+  key:'',seeds:[],profile:{},feedback:{},rated:[],
+  favorites:[],mode:'popular',seedArtists:[],candidates:[],
+  cache:{info:{},tags:{},tracks:{}}
+ }
+}
+function loadData(){
+ try{
+  return Object.assign(defaultData(),JSON.parse(localStorage.getItem(STORE)||'{}'));
+ }catch(e){return defaultData()}
+}
+function save(){
+ try{
+  localStorage.setItem(STORE,JSON.stringify(data));
+ }catch(e){
+  if(e&& (e.name==='QuotaExceededError'||e.code===22||e.code===1014)){
+   data.cache={info:{},tags:{},tracks:{}};
+   try{
+    localStorage.setItem(STORE,JSON.stringify(data));
+   }catch(retryError){
+    console.error('Не удалось сохранить данные после очистки кэша:',retryError);
+   }
+  }else{
+   console.error('Ошибка сохранения данных:',e);
+  }
+ }
+}
+function esc(s){
+ return String(s??'').replace(/[&<>"']/g,c=>({
+  '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+ }[c]))
+}
+function norm(s){return String(s||'').toLowerCase().trim()}
+function stopAudio(){
+ if(activeAudio){activeAudio.pause();activeAudio.currentTime=0;activeAudio=null}
+ const a=$('audio');if(a){a.pause();a.currentTime=0}
+}
+function switchTab(tab){
+ stopAudio();
+ document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id===tab+'View'));
+ document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));
+ if(tab==='favorites')renderFavorites();
+ if(tab==='discover')renderTrack();
+}
+document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>switchTab(b.dataset.tab)));
+window.switchTab=switchTab;
+
+function showModal(id){$(id).classList.add('show')}
+function hideModal(id){$(id).classList.remove('show')}
+$('settingsBtn').onclick=()=>showModal('settingsModal');
+$('closeSettings').onclick=()=>hideModal('settingsModal');
+$('changeKey').onclick=()=>{
+ hideModal('settingsModal');$('apiKeyInput').value=data.key;showModal('keyModal')
+};
+$('closeKey').onclick=()=>hideModal('keyModal');
+
+$('saveKey').onclick=()=>{
+ const apiKey=$('apiKeyInput').value;
+ const k=apiKey.trim();
+ if(!k){alert('Вставь API Key');return}
+ data.key=k;save();hideModal('keyModal');
+ $('buildStatus').textContent='Ключ сохранён. Теперь добавь любимых артистов.'
+};
+if(!data.key)showModal('keyModal');
+
+$('popularBtn').onclick=()=>setMode('popular');
+$('undergroundBtn').onclick=()=>setMode('underground');
+function setMode(m){
+ mode=data.mode=m;save();
+ $('popularBtn').classList.toggle('active',m==='popular');
+ $('undergroundBtn').classList.toggle('active',m==='underground');
+}
+
+function cacheBucket(type,key){return data.cache[type][norm(key)]}
+function cachePut(type,key,value){
+ data.cache[type][norm(key)]=value;
+}
+async function lastfm(method,params={}){
+ if(!data.key)throw Error('Сначала добавь Last.fm API Key в настройках.');
+ const u=new URL(API);
+ u.search=new URLSearchParams({method,api_key:data.key,format:'json',...params});
+ const r=await fetch(u);
+ if(!r.ok)throw Error(`Last.fm HTTP ${r.status} ${r.statusText}`);
+ const j=await r.json();
+ if(j.error)throw Error(`Last.fm API error ${j.error}: ${j.message||'Unknown error'}`);
+ return j;
+}
+
+// Параллельная обработка с ограниченным размером батча.
+// Promise.allSettled позволяет не обрывать весь батч из-за одного артиста.
+async function inBatches(items,size,worker,onProgress){
+ const results=[];
+ for(let i=0;i<items.length;i+=size){
+  const batch=items.slice(i,i+size);
+  const settled=await Promise.allSettled(batch.map(worker));
+  results.push(...settled);
+  if(onProgress)onProgress(Math.min(i+size,items.length),items.length);
+ }
+ return results;
+}
+
+async function getArtistInfo(name){
+ const cached=cacheBucket('info',name);
+ if(cached)return cached;
+ const r=await lastfm('artist.getInfo',{artist:name});
+ const a=r.artist;
+ if(!a)throw Error(`Artist not found: ${name}`);
+ const result={name:a.name,mbid:a.mbid,tags:((a.tags||{}).tag||[]).map(t=>t.name),listeners:+a.stats?.listeners||0};
+ cachePut('info',name,result);save();return result;
+}
+async function getArtistTags(name){
+ const cached=cacheBucket('tags',name);
+ if(cached)return cached;
+ const r=await lastfm('artist.getTopTags',{artist:name});
+ const tags=(r.toptags?.tag||[]).slice(0,12).map(t=>({name:t.name,count:+t.count||0}));
+ cachePut('tags',name,tags);save();return tags;
+}
+async function getTopTracks(name){
+ const cached=cacheBucket('tracks',name);
+ if(cached)return cached;
+ const r=await lastfm('artist.getTopTracks',{artist:name,limit:5});
+ const tracks=(r.toptracks?.track||[]).map(t=>({name:t.name,artist:name}));
+ cachePut('tracks',name,tracks);save();return tracks;
+}
+
+async function resolveSeed(seed){
+ let artistError=null;
+ try{return await getArtistInfo(seed)}catch(e){artistError=e}
+ try{
+  const t=await lastfm('track.getInfo',{track:seed});
+  const artist=t.track?.artist?.name;
+  if(artist)return await getArtistInfo(artist);
+ }catch(e){
+  throw Error(`Не удалось найти «${seed}». Last.fm: ${e.message}. Artist lookup: ${artistError.message}`)
+ }
+ throw Error(`Last.fm не вернул артиста для «${seed}». ${artistError.message}`)
+}
+
+function addWeight(tags,amount){
+ for(const t of tags){
+  const k=norm(t);if(!k)continue;
+  data.profile[k]=(data.profile[k]||0)+amount;
+  if(data.profile[k]<=0)data.profile[k]=0
+ }
+}
+function topTags(){
+ return Object.entries(data.profile).filter(x=>x[1]>0).sort((a,b)=>b[1]-a[1]).slice(0,12)
+}
+function renderProfile(){
+ const tags=topTags();
+ $('profileTags').innerHTML=tags.length?
+ tags.map(([t,w])=>`<span class="chip">${esc(t)} · ${w.toFixed(1)}</span>`).join(''):
+ '<span class="muted small">Профиль пока пуст.</span>'
+}
+function scoreTags(tags){
+ const vals=tags.map(t=>data.profile[norm(t)]||0);
+ const max=vals.reduce((a,b)=>a+b,0);
+ const total=Object.values(data.profile).reduce((a,b)=>a+Math.max(0,b),0);
+ return total?Math.min(99,Math.round(max/Math.max(total*.35,1)*100)):0
+}
+
+// Полная сборка профиля начинается с чистой очереди.
+// При новой сборке отменяем логически предыдущую (token guard).
+$('buildBtn').onclick=buildProfile;
+async function buildProfile(){
+ if(busy)return;
+ const seeds=$('seeds').value.split(/[\n,;]+/).map(s=>s.trim()).filter(Boolean);
+ if(seeds.length<3||seeds.length>10){
+  $('buildStatus').textContent='Введи от 3 до 10 исполнителей или треков.';
+  return
+ }
+ const token=++buildToken;
+ queueToken++;
+ stopAudio();
+ queue=[];qIndex=0;
+ data.seeds=seeds;
+ data.profile={};data.candidates=[];data.seedArtists=[];
+ save();renderProfile();renderTrack();
+ busy=true;$('buildBtn').disabled=true;
+ $('buildStatus').innerHTML='<span class="spinner"></span>Собираю музыкальный профиль…';
+ $('queueStatus').innerHTML='<span class="spinner"></span>Формируем очередь треков…';
+ $('queueCount').textContent='';
+ try{
+  const seedResults=await inBatches(seeds,BATCH_SIZE,resolveSeed,(done,total)=>{
+   if(token===buildToken)$('buildStatus').textContent=`Анализ артистов: ${done}/${total}`;
+  });
+  if(token!==buildToken)return;
+  const artists=[];
+  const errors=[];
+  seedResults.forEach((r,i)=>{
+   if(r.status==='fulfilled')artists.push(r.value);
+   else errors.push(`${seeds[i]}: ${r.reason?.message||r.reason}`)
+  });
+  if(artists.length<3)throw Error('Не удалось определить хотя бы 3 исполнителя.\n'+errors.join('\n'));
+  data.seedArtists=artists;
+  artists.forEach(a=>addWeight(a.tags,1.5));
+  renderProfile();save();
+
+  const similarResults=await inBatches(artists,BATCH_SIZE,async a=>{
+   const r=await lastfm('artist.getSimilar',{artist:a.name,limit:40});
+   return r.similarartists?.artist||[];
+  },(done,total)=>{
+   if(token===buildToken)$('buildStatus').textContent=`Ищу похожих артистов: ${done}/${total}`;
+  });
+  if(token!==buildToken)return;
+  const pool=new Map();
+  similarResults.forEach(r=>{
+   if(r.status!=='fulfilled')return;
+   for(const x of r.value){
+    if(!x.name||artists.some(a=>norm(a.name)===norm(x.name)))continue;
+    const key=norm(x.name),old=pool.get(key);
+    if(!old||(+x.match||0)>old.match)pool.set(key,{name:x.name,match:+x.match||0});
+   }
+  });
+  data.candidates=[...pool.values()].sort((a,b)=>b.match-a.match).slice(0,MAX_CANDIDATES);
+  save();
+  $('buildStatus').textContent=`Профиль готов. Артистов: ${artists.length}. Похожих: ${data.candidates.length}.`;
+  await makeQueue(token);
+  if(token!==buildToken)return;
+  switchTab('discover');
+ }catch(e){
+  if(token===buildToken){
+   $('buildStatus').textContent='Ошибка: '+e.message;
+   $('queueStatus').textContent='Не удалось сформировать очередь.';
+  }
+ }finally{
+  if(token===buildToken){busy=false;$('buildBtn').disabled=false}
+ }
+}
+
+// Fisher-Yates shuffle
+function shuffle(arr){
+ const a=arr.slice();
+ for(let i=a.length-1;i>0;i--){
+  const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]
+ }
+ return a
+}
+// Round robin: забираем по одному треку у каждого артиста за проход.
+function roundRobin(groups){
+ const result=[];
+ const lists=groups.map(g=>g.tracks.slice());
+ while(lists.some(a=>a.length)){
+  for(const list of lists)if(list.length)result.push(list.shift())
+ }
+ return result
+}
+
+async function makeQueue(parentToken=buildToken){
+ const token=++queueToken;
+ queue=[];qIndex=0;stopAudio();
+ $('trackHost').innerHTML='';
+ $('discoverEmpty').style.display='none';
+ $('queueStatus').innerHTML='<span class="spinner"></span>Формируем очередь треков…';
+ $('queueCount').textContent='';
+
+ const seen=new Set([
+  ...(data.seeds||[]),...(data.rated||[]),
+  ...(data.favorites||[]).map(x=>x.key)
+ ].map(norm));
+ // Сначала ограничиваем пул, а затем делаем API enrichment.
+ const candidates=(data.candidates||[]).slice().sort((a,b)=>b.match-a.match).slice(0,MAX_CANDIDATES);
+ const infoResults=await inBatches(candidates,BATCH_SIZE,async c=>{
+  let info;
+  try{info=await getArtistInfo(c.name)}
+  catch(e){info={name:c.name,listeners:0,tags:[]}}
+  let tags=info.tags||[];
+  if(!tags.length)tags=(await getArtistTags(c.name)).map(t=>t.name);
+  return {name:c.name,listeners:info.listeners||0,tags,match:scoreTags(tags),similarity:c.match||0};
+ },(done,total)=>{$('queueStatus').textContent=`Обогащение артистов: ${done}/${total}`});
+ if(token!==queueToken||parentToken!==buildToken)return;
+
+ let enriched=infoResults.filter(x=>x.status==='fulfilled').map(x=>x.value);
+ if(mode==='underground'){
+  enriched=enriched.filter(a=>a.listeners>0&&a.listeners<250000)
+   .sort((a,b)=>a.listeners-b.listeners||b.match-a.match)
+ }else{
+  enriched.sort((a,b)=>b.match-a.match||b.similarity-a.similarity)
+ }
+ // Запрашиваем top tracks только для ограниченного числа артистов.
+ enriched=enriched.slice(0,35);
+ $('queueStatus').textContent='Загружаю треки артистов…';
+ const trackResults=await inBatches(enriched,BATCH_SIZE,async a=>{
+  return {artist:a,tracks:await getTopTracks(a.name)}
+ },(done,total)=>{$('queueStatus').textContent=`Загрузка треков: ${done}/${total}`});
+ if(token!==queueToken||parentToken!==buildToken)return;
+
+ const groups=[];
+ for(const r of trackResults){
+  if(r.status!=='fulfilled')continue;
+  const {artist,tracks}=r.value;
+  const filtered=shuffle(tracks.filter(t=>!seen.has(norm(t.name+' '+t.artist))&&!seen.has(norm(t.name))));
+  if(filtered.length)groups.push({artist:artist.name,match:artist.match,tags:artist.tags,tracks:filtered.map(t=>({
+   ...t,tags:artist.tags,match:artist.match,listeners:artist.listeners,key:norm(t.name+' '+t.artist)
+  }))})
+ }
+ // Round-robin сохраняет разнообразие артистов.
+ queue=roundRobin(groups);
+ // Лёгкая случайная ротация групп: одинаковый match не превращается в блоки.
+ queue=queue.map((t,i)=>({...t,queueIndex:i}));
+ qIndex=0;
+ $('queueCount').textContent=queue.length+' треков';
+ $('queueStatus').textContent=queue.length?'Очередь готова.':'Подходящих треков не найдено.';
+ $('discoverEmpty').style.display=queue.length?'none':'block';
+ renderTrack()
+}
+
+async function enrichItunes(track){
+ const term=encodeURIComponent(track.name+' '+track.artist);
+ try{
+  const r=await fetch('https://itunes.apple.com/search?term='+term+'&entity=song&limit=8');
+  const j=await r.json();
+  const found=(j.results||[]).find(x=>norm(x.trackName)===norm(track.name))||(j.results||[])[0];
+  if(found){
+   track.cover=(found.artworkUrl100||'').replace(/100x100bb/g,'600x600').replace(/100x100/g,'600x600');
+   track.preview=found.previewUrl||'';track.itunes=found.trackViewUrl||'';track.album=found.collectionName||''
+  }
+ }catch(e){}
+ return track
+}
+function renderTrack(){
+ const host=$('trackHost');
+ if(!queue.length||qIndex>=queue.length){
+  host.innerHTML='';$('discoverEmpty').style.display='block';return
+ }
+ $('discoverEmpty').style.display='none';
+ const t=queue[qIndex];
+ const cover=t.cover||'https://placehold.co/600x600/211b35/bca5ff?text=♫';
+ host.innerHTML=`<article class="panel track-card">
+ <div class="match">✦ Совпадение: <b>${t.match||0}%</b> по тегам <span class="muted">· ${qIndex+1}/${queue.length}</span></div>
+ <div class="track-layout"><div><img class="cover" id="trackCover" src="${esc(cover)}" alt="Обложка" onerror="this.src='https://placehold.co/600x600/211b35/bca5ff?text=♫'"></div>
+ <div class="track-meta"><div class="track-title">${esc(t.name)}</div><div class="artist">${esc(t.artist)}</div>
+ <div class="tags">${(t.tags||[]).slice(0,5).map(x=>`<span class="chip">${esc(x)}</span>`).join('')}</div>
+ <audio id="audio" controls preload="none" ${t.preview?`src="${esc(t.preview)}"`:''}></audio>
+ <div class="small muted" id="previewNote">${t.preview?'30-секундное превью':'Ищу аудио-превью…'}</div></div></div>
+ <div class="actions"><button class="btn danger" id="dislike">👎 Дизлайк</button><button class="btn primary" id="like">♥ Лайк</button></div>
+ </article>`;
+ const audio=$('audio');activeAudio=audio;
+ $('like').onclick=()=>rate(t,1);
+ $('dislike').onclick=()=>rate(t,-1);
+ if(!t.loaded){
+  t.loaded=true;
+  enrichItunes(t).then(x=>{
+   if(queue[qIndex]!==t)return;
+   const img=$('trackCover');if(img&&x.cover)img.src=x.cover;
+   const a=$('audio');
+   if(a&&x.preview){a.src=x.preview;$('previewNote').textContent='30-секундное превью · iTunes'}
+   else if($('previewNote'))$('previewNote').textContent='Превью не найдено';
+  })
+ }
+}
+function rate(t,val){
+ stopAudio();
+ const key=norm(t.name+' '+t.artist);
+ if(!data.feedback[key])data.feedback[key]=val;
+ data.rated=data.rated||[];
+ if(!data.rated.includes(key))data.rated.push(key);
+ addWeight(t.tags||[],val*.7);
+ if(val>0&&!data.favorites.some(x=>x.key===key)){
+  data.favorites.unshift({key,name:t.name,artist:t.artist,cover:t.cover||'',tags:t.tags||[],preview:t.preview||''})
+ }
+ save();renderProfile();qIndex++;renderTrack();
+ $('queueCount').textContent=Math.max(0,queue.length-qIndex)+' осталось'
+}
+
+function renderFavorites(){
+ const favs=data.favorites||[];
+ $('favCount').textContent=favs.length+' трек'+(favs.length===1?'':'ов');
+ $('favoritesList').innerHTML=favs.length?favs.map((t,i)=>`
+ <div class="favrow"><img src="${esc(t.cover||'https://placehold.co/100/222/aaa?text=♫')}" alt="">
+ <div class="favinfo"><strong>${esc(t.name)}</strong><span>${esc(t.artist)}</span>
+ <div class="links">
+ <a target="_blank" rel="noopener" href="https://music.youtube.com/search?q=${encodeURIComponent(t.name+' '+t.artist)}">YouTube Music</a>
+ <a target="_blank" rel="noopener" href="https://open.spotify.com/search/${encodeURIComponent(t.name+' '+t.artist)}">Spotify</a>
+ <a target="_blank" rel="noopener" href="https://music.yandex.ru/search?text=${encodeURIComponent(t.name+' '+t.artist)}">Яндекс</a>
+ </div></div><button class="iconbtn" title="Убрать" onclick="removeFav(${i})">×</button></div>`).join(''):
+ '<div class="empty"><div class="big">♡</div>Тут пока пусто. Лайкни что-нибудь в «Открытиях»!</div>'
+}
+window.removeFav=i=>{data.favorites.splice(i,1);save();renderFavorites()};
+$('exportBtn').onclick=()=>{
+ const text=(data.favorites||[]).map((t,i)=>`${i+1}. ${t.name} — ${t.artist}
+   YouTube Music: https://music.youtube.com/search?q=${encodeURIComponent(t.name+' '+t.artist)}
+   Spotify: https://open.spotify.com/search/${encodeURIComponent(t.name+' '+t.artist)}
+   Яндекс Музыка: https://music.yandex.ru/search?text=${encodeURIComponent(t.name+' '+t.artist)}`).join('\n\n');
+ const blob=new Blob([text||'Избранное пусто.'],{type:'text/plain;charset=utf-8'});
+ const url=URL.createObjectURL(blob),a=document.createElement('a');
+ a.href=url;a.download='GemTune-Radar-favorites.txt';a.click();URL.revokeObjectURL(url)
+};
+$('clearFavs').onclick=()=>{
+ if(confirm('Удалить все избранные треки?')){data.favorites=[];save();renderFavorites()}
+};
+$('rebuild').onclick=()=>{
+ hideModal('settingsModal');
+ if(data.seeds?.length)$('seeds').value=data.seeds.join('\n');
+ buildProfile()
+};
+$('resetData').onclick=()=>{
+ if(!confirm('Удалить профиль, оценки, кандидатов и избранное?'))return;
+ buildToken++;queueToken++;stopAudio();
+ busy=false;$('buildBtn').disabled=false;
+ data={...defaultData(),key:data.key,mode};
+ queue=[];qIndex=0;
+ save();renderProfile();renderFavorites();renderTrack();
+ $('buildStatus').textContent='Профиль очищен.';
+ $('queueStatus').textContent='Очередь очищена.';
+ $('queueCount').textContent='';
+ $('seeds').value='';
+ hideModal('settingsModal')
+};
+
+// При загрузке страницы не запускаем makeQueue автоматически.
+// Кэш и сохранённая очередь не должны конфликтовать с ручной сборкой.
+$('seeds').value=(data.seeds||[]).join('\n');
+renderProfile();renderFavorites();setMode(mode);
+if(data.candidates?.length){
+ $('queueStatus').textContent='Профиль сохранён. Нажми «Пересобрать рекомендации» в настройках.'
+}
+})();
+</script>
+</body>
+</html>
